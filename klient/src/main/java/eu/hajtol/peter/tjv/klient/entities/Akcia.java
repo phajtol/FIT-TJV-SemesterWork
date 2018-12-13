@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.hajtol.peter.tjv.server.entities;
+package eu.hajtol.peter.tjv.klient.entities;
 
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -18,8 +17,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -28,41 +25,36 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author peter
  */
 @Entity
-@Table(name = "uzivatel")
 @XmlRootElement
-public class Uzivatel implements Serializable {
+public class Akcia implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
     
-    private String nick;
-    private String meno;
-    private String priezvisko;
-    private String telefon;
-    private String mail;
+    private String nazov;
+    private String datumcas;
     
-    @JoinColumn(name = "adresa_id", referencedColumnName = "id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Adresa adresa;
-    
-    @XmlTransient
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
             name = "uzivatel_akcia", 
-            joinColumns = @JoinColumn(name = "uzivatelia_id"),
-            inverseJoinColumns = @JoinColumn(name = "akcie_id")
+            joinColumns = @JoinColumn(name = "akcie_id"),
+            inverseJoinColumns = @JoinColumn(name = "uzivatelia_id")
     )
-    private List<Akcia> akcie;
+    private List<Uzivatel> uzivatelia;
+    
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "adresa_id", referencedColumnName = "id")
+    private Adresa adresa;
 
     @XmlTransient
-    public List<Akcia> getAkcie() {
-        return akcie;
+    public List<Uzivatel> getUzivatelia() {
+        return uzivatelia;
     }
 
-    public void setAkcie(List<Akcia> akcie) {
-        this.akcie = akcie;
+    public void setUzivatelia(List<Uzivatel> uzivatelia) {
+        this.uzivatelia = uzivatelia;
     }
     
     public Adresa getAdresa() {
@@ -73,44 +65,20 @@ public class Uzivatel implements Serializable {
         this.adresa = adresa;
     }
 
-    public String getNick() {
-        return nick;
+    public String getNazov() {
+        return nazov;
     }
 
-    public void setNick(String nick) {
-        this.nick = nick;
+    public void setNazov(String nazov) {
+        this.nazov = nazov;
     }
 
-    public String getMeno() {
-        return meno;
+    public String getDatumcas() {
+        return datumcas;
     }
 
-    public void setMeno(String meno) {
-        this.meno = meno;
-    }
-
-    public String getPriezvisko() {
-        return priezvisko;
-    }
-
-    public void setPriezvisko(String priezvisko) {
-        this.priezvisko = priezvisko;
-    }
-
-    public String getTelefon() {
-        return telefon;
-    }
-
-    public void setTelefon(String telefon) {
-        this.telefon = telefon;
-    }
-
-    public String getMail() {
-        return mail;
-    }
-
-    public void setMail(String mail) {
-        this.mail = mail;
+    public void setDatumcas(String datumcas) {
+        this.datumcas = datumcas;
     }
 
     public Integer getId() {
@@ -131,10 +99,10 @@ public class Uzivatel implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Uzivatel)) {
+        if (!(object instanceof Akcia)) {
             return false;
         }
-        Uzivatel other = (Uzivatel) object;
+        Akcia other = (Akcia) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -143,7 +111,7 @@ public class Uzivatel implements Serializable {
 
     @Override
     public String toString() {
-        return "eu.hajtol.peter.tjv.server.Uzivatel[ id=" + id + " ]";
+        return "eu.hajtol.peter.tjv.server.entities.Akcia[ id=" + id + " ]";
     }
     
 }

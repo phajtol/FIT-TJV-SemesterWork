@@ -29,6 +29,8 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(eu.hajtol.peter.tjv.server.services.AdresaFacadeREST.class);
+        resources.add(eu.hajtol.peter.tjv.server.services.AkciaFacadeREST.class);
         resources.add(eu.hajtol.peter.tjv.server.services.UzivatelFacadeREST.class);
     }
     

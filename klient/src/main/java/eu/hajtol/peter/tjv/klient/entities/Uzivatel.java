@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.hajtol.peter.tjv.server.entities;
+package eu.hajtol.peter.tjv.klient.entities;
 
 import java.io.Serializable;
 import java.util.List;
