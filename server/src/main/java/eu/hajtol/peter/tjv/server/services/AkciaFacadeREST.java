@@ -6,6 +6,7 @@
 package eu.hajtol.peter.tjv.server.services;
 
 import eu.hajtol.peter.tjv.server.entities.Akcia;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -87,5 +88,27 @@ public class AkciaFacadeREST extends AbstractFacade<Akcia> {
     protected EntityManager getEntityManager() {
         return em;
     }
+    
+    //custom
+    
+    @GET
+    @Path("search/{query}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Akcia> findUsers(@PathParam("query") String query) {
+        List<Akcia> allEvents = super.findAll();
+        List<Akcia> res = new ArrayList();
+
+        for (Akcia event : allEvents) {
+            if (
+                (event.getNazov() != null && event.getNazov().toLowerCase().contains(query.trim().toLowerCase()))
+             || (event.getDatumcas() != null && event.getDatumcas().toLowerCase().contains(query.trim().toLowerCase()))
+               ) {
+                res.add(event);
+            }
+        }
+        
+        return res;
+    }
+    
     
 }

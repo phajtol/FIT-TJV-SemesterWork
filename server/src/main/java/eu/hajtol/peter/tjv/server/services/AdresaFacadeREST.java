@@ -6,6 +6,7 @@
 package eu.hajtol.peter.tjv.server.services;
 
 import eu.hajtol.peter.tjv.server.entities.Adresa;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -86,6 +87,30 @@ public class AdresaFacadeREST extends AbstractFacade<Adresa> {
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+    
+    //custom
+    
+    @GET
+    @Path("search/{query}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Adresa> findUsers(@PathParam("query") String query) {
+        List<Adresa> allAddresses = super.findAll();
+        List<Adresa> res = new ArrayList();
+
+        for (Adresa address : allAddresses) {
+            if (
+                (address.getCislo() != null && address.getCislo().toString().toLowerCase().contains(query.trim().toLowerCase()))
+             || (address.getUlica() != null && address.getUlica().toLowerCase().contains(query.trim().toLowerCase()))
+             || (address.getMesto() != null && address.getMesto().toLowerCase().contains(query.trim().toLowerCase()))
+             || (address.getPsc() != null && address.getPsc().toLowerCase().contains(query.trim().toLowerCase()))
+             || (address.getKrajina() != null && address.getKrajina().toLowerCase().contains(query.trim().toLowerCase()))
+               ) {
+                res.add(address);
+            }
+        }
+        
+        return res;
     }
     
 }

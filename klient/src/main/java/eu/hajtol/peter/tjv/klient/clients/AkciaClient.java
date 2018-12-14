@@ -107,4 +107,11 @@ public class AkciaClient {
                 new GenericType<List<Akcia>>(){}
         );
     }
+    
+    public List<Akcia> find(String needle) throws ClientErrorException { 
+        WebTarget resource = webTarget.path(java.text.MessageFormat.format("search/{0}", new Object[]{needle}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(
+                new GenericType<List<Akcia>>(){}
+        );
+    }
 }

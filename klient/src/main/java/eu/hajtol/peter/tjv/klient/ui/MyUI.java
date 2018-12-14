@@ -35,27 +35,25 @@ public class MyUI extends UI {
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         final VerticalLayout layout = new VerticalLayout();
-       
- 
-        HorizontalLayout userTable = new HorizontalLayout();
-        HorizontalLayout addressTable = new HorizontalLayout();
-        HorizontalLayout eventTable = new HorizontalLayout();
+        HorizontalLayout userSection = new HorizontalLayout();
+        HorizontalLayout addressSection = new HorizontalLayout();
+        HorizontalLayout eventSection = new HorizontalLayout();
         
         //clients
         AdresaClient adrCl = new AdresaClient();
         AkciaClient akcCl = new AkciaClient();
         UzivatelClient uzivCl = new UzivatelClient();
         
-       
-        /*Label label = new Label();
-        label.setValue("Uzivatelia: " + uzivCl.countREST() + ", adresy: " + adrCl.countREST() + ", akcie: " + akcCl.countREST());
- 
-        layout.addComponent(label);*/
+        //data for grids
         List<Uzivatel> userList = uzivCl.findAll();
         List<Adresa> addressList = adrCl.findAll();
         List<Akcia> eventList = akcCl.findAll();
- 
-       //USER PART
+        
+       
+        //==========
+        //USER PART
+        //==========
+        //grid
         Grid<Uzivatel> userGrid = new Grid<>();
         userGrid.setWidth("800px");
         userGrid.setItems(userList);
@@ -66,9 +64,24 @@ public class MyUI extends UI {
         userGrid.addColumn(Uzivatel::getTelefon).setCaption("Telefón");
         userGrid.addColumn(Uzivatel::getMail).setCaption("E-mail");
         userGrid.addColumn(Uzivatel::getAdresa).setCaption("Adresa");
-        
+       
+        //search form
+        HorizontalLayout userSearchForm = new HorizontalLayout();
+        TextField userSearchText = new TextField();
+        Button userSearchBtn = new Button("Hľadať");
+        userSearchBtn.addClickListener(e -> {
+            if (userSearchText.getValue().equals("")) {
+                userGrid.setItems(uzivCl.findAll());
+            } else {
+                List<Uzivatel> res = uzivCl.find(userSearchText.getValue());
+                userGrid.setItems(res);
+            }
+        });
+        userSearchForm.addComponents(userSearchText, userSearchBtn);
+       
+        //add/edit form
         Label userLabel = new Label("Užívatelia (celkom: " + uzivCl.countREST() + ")");
-        FormLayout userForm = new FormLayout();
+        FormLayout userForms = new FormLayout();
         TextField userField1 = new TextField("ID");
         userField1.setEnabled(false);
         TextField userField2 = new TextField("Meno");
@@ -80,11 +93,13 @@ public class MyUI extends UI {
         Button userBtn2 = new Button("Zmazať");
         Button userBtn3 = new Button("Vytvoriť");
         
-        userForm.addComponents(userLabel, userField1, userField2, userField3, userField4, userField5, userField6, new HorizontalLayout(userBtn1, userBtn2, userBtn3));
+        userForms.addComponents(userSearchForm, userLabel, userField1, userField2, userField3, userField4, userField5, userField6, new HorizontalLayout(userBtn1, userBtn2, userBtn3));
         
         
-        
-        //addressgrid
+        //==========
+        //ADDREESS PART
+        //==========
+        //grid
         Grid<Adresa> addressGrid = new Grid<>();
         addressGrid.setWidth("800px");
         addressGrid.setItems(addressList);
@@ -95,8 +110,23 @@ public class MyUI extends UI {
         addressGrid.addColumn(Adresa::getMesto).setCaption("Mesto");
         addressGrid.addColumn(Adresa::getKrajina).setCaption("Krajina");
         
+        //search form
+        HorizontalLayout addressSearchForm = new HorizontalLayout();
+        TextField addressSearchText = new TextField();
+        Button addressSearchBtn = new Button("Hľadať");
+        addressSearchBtn.addClickListener(e -> {
+            if (addressSearchText.getValue().equals("")) {
+                addressGrid.setItems(adrCl.findAll());
+            } else {
+                List<Adresa> res = adrCl.find(addressSearchText.getValue());
+                addressGrid.setItems(res);
+            }
+        });
+        addressSearchForm.addComponents(addressSearchText, addressSearchBtn);
+        
+        //add/edit form
         Label addressLabel = new Label("Adresy (celkom: " + adrCl.countREST() + ")");
-        FormLayout addressForm = new FormLayout();
+        FormLayout addressForms = new FormLayout();
         TextField addressField1 = new TextField("ID");
         addressField1.setEnabled(false);
         TextField addressField2 = new TextField("Ulica");
@@ -108,13 +138,15 @@ public class MyUI extends UI {
         Button addressBtn2 = new Button("Zmazať");
         Button addressBtn3 = new Button("Vytvoriť");
         
-        addressForm.addComponents(addressLabel, addressField1, addressField2, addressField3, addressField4, addressField5, addressField6, 
+        addressForms.addComponents(addressSearchForm, addressLabel, addressField1, addressField2, addressField3, addressField4, addressField5, addressField6, 
                 new HorizontalLayout(addressBtn1, addressBtn2, addressBtn3)
         );
         
         
-        
-        //eventsgrid
+        //==========
+        //EVENT PART
+        //==========
+        //grid
         Grid<Akcia> eventGrid = new Grid<>();
         eventGrid.setWidth("800px");
         eventGrid.setItems(eventList);
@@ -122,6 +154,21 @@ public class MyUI extends UI {
         eventGrid.addColumn(Akcia::getNazov).setCaption("Názov");
         eventGrid.addColumn(Akcia::getDatumcas).setCaption("Dátum a čas");
         
+        //search form
+        HorizontalLayout eventSearchForm = new HorizontalLayout();
+        TextField eventSearchText = new TextField();
+        Button eventSearchBtn = new Button("Hľadať");
+        eventSearchBtn.addClickListener(e -> {
+            if (eventSearchText.getValue().equals("")) {
+                eventGrid.setItems(akcCl.findAll());
+            } else {
+                List<Akcia> res = akcCl.find(eventSearchText.getValue());
+                eventGrid.setItems(res);
+            }
+        });
+        eventSearchForm.addComponents(eventSearchText, eventSearchBtn);
+        
+        //add/edit form
         Label eventLabel = new Label("Akcie (celkom: " + akcCl.countREST() + ")");
         FormLayout eventForm = new FormLayout();
         TextField eventField1 = new TextField("ID");
@@ -132,15 +179,15 @@ public class MyUI extends UI {
         Button eventBtn2 = new Button("Zmazať");
         Button eventBtn3 = new Button("Vytvoriť");
         
-        eventForm.addComponents(eventLabel, eventField1, eventField2, eventField3, new HorizontalLayout(eventBtn1, eventBtn2, eventBtn3));
+        eventForm.addComponents(eventSearchForm, eventLabel, eventField1, eventField2, eventField3, new HorizontalLayout(eventBtn1, eventBtn2, eventBtn3));
         
         
         
-        eventTable.addComponents(eventGrid, eventForm);
-        addressTable.addComponents(addressGrid, addressForm);
-        userTable.addComponents(userGrid, userForm);
+        eventSection.addComponents(eventGrid, eventForm);
+        addressSection.addComponents(addressGrid, addressForms);
+        userSection.addComponents(userGrid, userForms);
         
-        layout.addComponents(userTable, addressTable, eventTable);
+        layout.addComponents(userSection, addressSection, eventSection);
         setContent(layout);
     }
 

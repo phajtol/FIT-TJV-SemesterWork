@@ -108,4 +108,11 @@ public class AdresaClient {
         );
     }
     
+    public List<Adresa> find(String needle) throws ClientErrorException { 
+        WebTarget resource = webTarget.path(java.text.MessageFormat.format("search/{0}", new Object[]{needle}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(
+                new GenericType<List<Adresa>>(){}
+        );
+    }
+    
 }

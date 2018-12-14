@@ -108,4 +108,11 @@ public class UzivatelClient {
                 new GenericType<List<Uzivatel>>(){}
         );
     }
+     
+     public List<Uzivatel> find(String needle) throws ClientErrorException { 
+        WebTarget resource = webTarget.path(java.text.MessageFormat.format("search/{0}", new Object[]{needle}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(
+                new GenericType<List<Uzivatel>>(){}
+        );
+    }
 }

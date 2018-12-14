@@ -6,6 +6,7 @@
 package eu.hajtol.peter.tjv.server.services;
 
 import eu.hajtol.peter.tjv.server.entities.Uzivatel;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -86,6 +87,30 @@ public class UzivatelFacadeREST extends AbstractFacade<Uzivatel> {
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+    
+    //custom
+    
+    @GET
+    @Path("search/{query}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Uzivatel> findUsers(@PathParam("query") String query) {
+        List<Uzivatel> allUsers = super.findAll();
+        List<Uzivatel> res = new ArrayList();
+
+        for (Uzivatel user : allUsers) {
+            if (
+                (user.getMeno() != null && user.getMeno().toLowerCase().contains(query.trim().toLowerCase()))
+             || (user.getPriezvisko() != null && user.getPriezvisko().toLowerCase().contains(query.trim().toLowerCase()))
+             || (user.getNick() != null && user.getNick().toLowerCase().contains(query.trim().toLowerCase()))
+             || (user.getMail() != null && user.getMail().toLowerCase().contains(query.trim().toLowerCase()))
+             || (user.getTelefon() != null && user.getTelefon().toLowerCase().contains(query.trim().toLowerCase()))
+               ) {
+                res.add(user);
+            }
+        }
+        
+        return res;
     }
     
 }
