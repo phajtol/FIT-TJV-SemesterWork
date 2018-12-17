@@ -6,6 +6,7 @@
 package eu.hajtol.peter.tjv.server.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -44,17 +45,16 @@ public class Uzivatel implements Serializable {
     private String mail;
     
     @JoinColumn(name = "adresa_id", referencedColumnName = "id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Adresa adresa;
     
-    @XmlTransient
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "uzivatel_akcia", 
             joinColumns = @JoinColumn(name = "uzivatelia_id"),
             inverseJoinColumns = @JoinColumn(name = "akcie_id")
     )
-    private List<Akcia> akcie;
+    private List<Akcia> akcie = new ArrayList<>();
 
     @XmlTransient
     public List<Akcia> getAkcie() {

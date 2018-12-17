@@ -44,11 +44,10 @@ public class Uzivatel implements Serializable {
     private String mail;
     
     @JoinColumn(name = "adresa_id", referencedColumnName = "id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Adresa adresa;
     
-    @XmlTransient
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "uzivatel_akcia", 
             joinColumns = @JoinColumn(name = "uzivatelia_id"),

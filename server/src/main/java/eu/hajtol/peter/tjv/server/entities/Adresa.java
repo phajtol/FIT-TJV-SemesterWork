@@ -7,7 +7,6 @@ package eu.hajtol.peter.tjv.server.entities;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -132,7 +131,7 @@ public class Adresa implements Serializable {
 
     @Override
     public String toString() {
-        return "eu.hajtol.peter.tjv.server.entities.Adresa[ id=" + id + " ]";
+        return this.ulica + " " + this.cislo + ", " + this.psc + " " + this.mesto + ", " + this.krajina;
     }
     
 }

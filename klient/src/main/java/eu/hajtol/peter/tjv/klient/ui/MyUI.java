@@ -4,9 +4,11 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
@@ -20,7 +22,9 @@ import eu.hajtol.peter.tjv.klient.clients.UzivatelClient;
 import eu.hajtol.peter.tjv.klient.entities.Adresa;
 import eu.hajtol.peter.tjv.klient.entities.Akcia;
 import eu.hajtol.peter.tjv.klient.entities.Uzivatel;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window 
@@ -49,6 +53,9 @@ public class MyUI extends UI {
         List<Adresa> addressList = adrCl.findAll();
         List<Akcia> eventList = akcCl.findAll();
         
+        //dropdown selects
+        ComboBox<Adresa> eventAddressSelect = new ComboBox("Adresa", addressList);
+        ComboBox<Adresa> userAddressSelect = new ComboBox("Adresa", addressList);
        
         //==========
         //USER PART
@@ -64,7 +71,13 @@ public class MyUI extends UI {
         userGrid.addColumn(Uzivatel::getTelefon).setCaption("Telefón");
         userGrid.addColumn(Uzivatel::getMail).setCaption("E-mail");
         userGrid.addColumn(Uzivatel::getAdresa).setCaption("Adresa");
+        
+        Grid<Akcia> userEventGrid = new Grid<>();
+        userEventGrid.addColumn(Akcia::getNazov).setCaption("Názov");
+        userEventGrid.addColumn(Akcia::getDatumcas).setCaption("Dátum a čas");
        
+        Label userLabel = new Label("Užívatelia (celkom: " + uzivCl.countREST() + ")");
+        
         //search form
         HorizontalLayout userSearchForm = new HorizontalLayout();
         TextField userSearchText = new TextField();
@@ -80,8 +93,7 @@ public class MyUI extends UI {
         userSearchForm.addComponents(userSearchText, userSearchBtn);
        
         //add/edit form
-        Label userLabel = new Label("Užívatelia (celkom: " + uzivCl.countREST() + ")");
-        FormLayout userForms = new FormLayout();
+        FormLayout userDetailForm = new FormLayout();
         TextField userField1 = new TextField("ID");
         userField1.setEnabled(false);
         TextField userField2 = new TextField("Meno");
@@ -89,11 +101,89 @@ public class MyUI extends UI {
         TextField userField4 = new TextField("Username");
         TextField userField5 = new TextField("Telefón");
         TextField userField6 = new TextField("E-mail");
-        Button userBtn1 = new Button("Upraviť");
-        Button userBtn2 = new Button("Zmazať");
-        Button userBtn3 = new Button("Vytvoriť");
+        Button userEditBtn = new Button("Upraviť");
+        Button userDeleteBtn = new Button("Zmazať");
+        Button userAddBtn = new Button("Vytvoriť");
+        userEditBtn.setVisible(false);
+        userDeleteBtn.setVisible(false);
+        userAddBtn.setVisible(true);
+        userDetailForm.addComponents(userField1, userField2, userField3, userField4, userField5, userField6, userAddressSelect, new HorizontalLayout(userEditBtn, userDeleteBtn, userAddBtn));
         
-        userForms.addComponents(userSearchForm, userLabel, userField1, userField2, userField3, userField4, userField5, userField6, new HorizontalLayout(userBtn1, userBtn2, userBtn3));
+        //add actions to buttons and grid selection
+        userEditBtn.addClickListener(e -> {
+            Uzivatel user = new Uzivatel();
+            user.setId(Integer.parseInt(userField1.getValue()));
+            user.setMeno(userField2.getValue());
+            user.setMeno(userField2.getValue());
+            user.setPriezvisko(userField3.getValue());
+            user.setNick(userField4.getValue());
+            user.setTelefon(userField5.getValue());
+            user.setMail(userField6.getValue());
+            user.setAdresa(userAddressSelect.getValue());
+            uzivCl.edit_XML(user, user.getId().toString());
+            userGrid.setItems(uzivCl.findAll());
+        });
+        userDeleteBtn.addClickListener(e -> {
+            uzivCl.remove(userField1.getValue());
+            userGrid.setItems(uzivCl.findAll());
+            userLabel.setValue("Užívatelia (celkom: " + uzivCl.countREST() + ")");
+        });
+        userAddBtn.addClickListener(e -> {
+            Uzivatel user = new Uzivatel();
+            user.setMeno(userField2.getValue());
+            user.setPriezvisko(userField3.getValue());
+            user.setNick(userField4.getValue());
+            user.setTelefon(userField5.getValue());
+            user.setMail(userField6.getValue());
+            user.setAdresa(userAddressSelect.getValue());
+            uzivCl.create_XML(user);
+            userGrid.setItems(uzivCl.findAll());
+            userLabel.setValue("Užívatelia (celkom: " + uzivCl.countREST() + ")");
+            
+            userField1.setValue("");
+            userField2.setValue("");
+            userField3.setValue("");
+            userField4.setValue("");
+            userField5.setValue("");
+            userField6.setValue("");
+            userAddressSelect.setSelectedItem(null);
+        });
+        userGrid.addSelectionListener((SelectionEvent<Uzivatel> e) -> {
+            Set<Uzivatel> selected = e.getAllSelectedItems();
+            
+            if (selected.size() > 0) {
+                Uzivatel user = selected.stream().findFirst().get();
+                
+                userEditBtn.setVisible(true);
+                userDeleteBtn.setVisible(true);
+                userAddBtn.setVisible(false);
+                
+                userField1.setValue(user.getId().toString());
+                userField2.setValue(user.getMeno());
+                userField3.setValue(user.getPriezvisko());
+                userField4.setValue(user.getNick());
+                userField5.setValue(user.getTelefon());
+                userField6.setValue(user.getMail());
+                userAddressSelect.setSelectedItem(user.getAdresa());
+                userEventGrid.setItems(user.getAkcie());
+            } else {
+                userEditBtn.setVisible(false);
+                userDeleteBtn.setVisible(false);
+                userAddBtn.setVisible(true);
+                
+                userField1.setValue("");
+                userField2.setValue("");
+                userField3.setValue("");
+                userField4.setValue("");
+                userField5.setValue("");
+                userField6.setValue("");
+                userAddressSelect.setSelectedItem(null);
+                userEventGrid.setItems(new ArrayList<Akcia>());
+            }            
+        });
+        
+        VerticalLayout userForms = new VerticalLayout();
+        userForms.addComponents(userLabel, userSearchForm, userDetailForm);
         
         
         //==========
@@ -110,6 +200,8 @@ public class MyUI extends UI {
         addressGrid.addColumn(Adresa::getMesto).setCaption("Mesto");
         addressGrid.addColumn(Adresa::getKrajina).setCaption("Krajina");
         
+        Label addressLabel = new Label("Adresy (celkom: " + adrCl.countREST() + ")");
+        
         //search form
         HorizontalLayout addressSearchForm = new HorizontalLayout();
         TextField addressSearchText = new TextField();
@@ -125,8 +217,7 @@ public class MyUI extends UI {
         addressSearchForm.addComponents(addressSearchText, addressSearchBtn);
         
         //add/edit form
-        Label addressLabel = new Label("Adresy (celkom: " + adrCl.countREST() + ")");
-        FormLayout addressForms = new FormLayout();
+        FormLayout addressDetailForm = new FormLayout();
         TextField addressField1 = new TextField("ID");
         addressField1.setEnabled(false);
         TextField addressField2 = new TextField("Ulica");
@@ -134,13 +225,92 @@ public class MyUI extends UI {
         TextField addressField4 = new TextField("PSČ");
         TextField addressField5 = new TextField("Mesto");
         TextField addressField6 = new TextField("Krajina");
-        Button addressBtn1 = new Button("Upraviť");
-        Button addressBtn2 = new Button("Zmazať");
-        Button addressBtn3 = new Button("Vytvoriť");
-        
-        addressForms.addComponents(addressSearchForm, addressLabel, addressField1, addressField2, addressField3, addressField4, addressField5, addressField6, 
-                new HorizontalLayout(addressBtn1, addressBtn2, addressBtn3)
+        Button addressEditBtn = new Button("Upraviť");
+        Button addressDeleteBtn = new Button("Zmazať");
+        Button addressAddBtn = new Button("Vytvoriť");
+        addressEditBtn.setVisible(false);
+        addressDeleteBtn.setVisible(false);
+        addressAddBtn.setVisible(true);
+        addressDetailForm.addComponents(addressField1, addressField2, addressField3, addressField4, addressField5, addressField6, 
+                new HorizontalLayout(addressEditBtn, addressDeleteBtn, addressAddBtn)
         );
+        
+        //add actions to buttons and grid selection
+        addressEditBtn.addClickListener(e -> {
+            Adresa address = new Adresa();
+            address.setId(Integer.parseInt(addressField1.getValue()));
+            address.setUlica(addressField2.getValue());
+            address.setCislo(Integer.parseInt(addressField3.getValue()));
+            address.setPsc(addressField4.getValue());
+            address.setMesto(addressField5.getValue());
+            address.setKrajina(addressField6.getValue());
+            uzivCl.edit_XML(address, address.getId().toString());
+            List<Adresa> addresses = adrCl.findAll();
+            addressGrid.setItems(addresses);
+            userAddressSelect.setItems(addresses);
+            eventAddressSelect.setItems(addresses);
+        });
+        addressDeleteBtn.addClickListener(e -> {
+            adrCl.remove(addressField1.getValue());
+            List<Adresa> addresses = adrCl.findAll();
+            addressGrid.setItems(addresses);
+            userAddressSelect.setItems(addresses);
+            eventAddressSelect.setItems(addresses);
+            addressLabel.setValue("Adresy (celkom: " + adrCl.countREST() + ")");
+        });
+        addressAddBtn.addClickListener(e -> {
+            Adresa address = new Adresa();
+            address.setUlica(addressField2.getValue());
+            address.setCislo(Integer.parseInt(addressField3.getValue()));
+            address.setPsc(addressField4.getValue());
+            address.setMesto(addressField5.getValue());
+            address.setKrajina(addressField6.getValue());
+            adrCl.create_XML(address);
+            List<Adresa> addresses = adrCl.findAll();
+            addressGrid.setItems(addresses);
+            userAddressSelect.setItems(addresses);
+            eventAddressSelect.setItems(addresses);
+            addressLabel.setValue("Adresy (celkom: " + adrCl.countREST() + ")");
+            
+            addressField1.setValue("");
+            addressField2.setValue("");
+            addressField3.setValue("");
+            addressField4.setValue("");
+            addressField5.setValue("");
+            addressField6.setValue("");
+        });
+        addressGrid.addSelectionListener(e -> {
+            Set<Adresa> selected = e.getAllSelectedItems();
+            
+            if (selected.size() > 0) {
+                Adresa address = selected.stream().findFirst().get();
+                
+                addressEditBtn.setVisible(true);
+                addressDeleteBtn.setVisible(true);
+                addressAddBtn.setVisible(false);
+                
+                addressField1.setValue(address.getId().toString());
+                addressField2.setValue(address.getUlica());
+                addressField3.setValue(address.getCislo().toString());
+                addressField4.setValue(address.getPsc());
+                addressField5.setValue(address.getMesto());
+                addressField6.setValue(address.getKrajina());
+            } else {
+                addressEditBtn.setVisible(false);
+                addressDeleteBtn.setVisible(false);
+                addressAddBtn.setVisible(true);
+                
+                addressField1.setValue("");
+                addressField2.setValue("");
+                addressField3.setValue("");
+                addressField4.setValue("");
+                addressField5.setValue("");
+                addressField6.setValue("");
+            }            
+        });
+        
+        VerticalLayout addressForms = new VerticalLayout();
+        addressForms.addComponents(addressLabel, addressSearchForm, addressDetailForm);
         
         
         //==========
@@ -153,6 +323,9 @@ public class MyUI extends UI {
         eventGrid.addColumn(Akcia::getId).setCaption("ID");
         eventGrid.addColumn(Akcia::getNazov).setCaption("Názov");
         eventGrid.addColumn(Akcia::getDatumcas).setCaption("Dátum a čas");
+        eventGrid.addColumn(Akcia::getAdresa).setCaption("Adresa");
+        
+        Label eventLabel = new Label("Akcie (celkom: " + akcCl.countREST() + ")");
         
         //search form
         HorizontalLayout eventSearchForm = new HorizontalLayout();
@@ -169,23 +342,81 @@ public class MyUI extends UI {
         eventSearchForm.addComponents(eventSearchText, eventSearchBtn);
         
         //add/edit form
-        Label eventLabel = new Label("Akcie (celkom: " + akcCl.countREST() + ")");
-        FormLayout eventForm = new FormLayout();
+        FormLayout eventDetailForm = new FormLayout();
         TextField eventField1 = new TextField("ID");
         eventField1.setEnabled(false);
         TextField eventField2 = new TextField("Názov");
         TextField eventField3 = new TextField("Dátum a čas");
-        Button eventBtn1 = new Button("Upraviť");
-        Button eventBtn2 = new Button("Zmazať");
-        Button eventBtn3 = new Button("Vytvoriť");
+        Button eventEditBtn = new Button("Upraviť");
+        Button eventDeleteBtn = new Button("Zmazať");
+        Button eventAddBtn = new Button("Vytvoriť");
+        eventEditBtn.setVisible(false);
+        eventDeleteBtn.setVisible(false);
+        eventAddBtn.setVisible(true);
+        eventDetailForm.addComponents(eventSearchForm, eventLabel, eventField1, eventField2, eventField3, eventAddressSelect, new HorizontalLayout(eventEditBtn, eventDeleteBtn, eventAddBtn));
         
-        eventForm.addComponents(eventSearchForm, eventLabel, eventField1, eventField2, eventField3, new HorizontalLayout(eventBtn1, eventBtn2, eventBtn3));
+        //add actions to buttons and grid selection
+        eventEditBtn.addClickListener(e -> {
+            Akcia event = new Akcia();
+            event.setId(Integer.parseInt(eventField1.getValue()));
+            event.setNazov(eventField2.getValue());
+            event.setDatumcas(eventField3.getValue());
+            event.setAdresa(eventAddressSelect.getValue());
+            akcCl.edit_XML(event, event.getId().toString());
+            eventGrid.setItems(akcCl.findAll());
+        });
+        eventDeleteBtn.addClickListener(e -> {
+            akcCl.remove(eventField1.getValue());
+            eventGrid.setItems(akcCl.findAll());
+            eventLabel.setValue("Akcie (celkom: " + akcCl.countREST() + ")");
+        });
+        eventAddBtn.addClickListener(e -> {
+            Akcia event = new Akcia();
+            event.setNazov(eventField2.getValue());
+            event.setDatumcas(eventField3.getValue());
+            event.setAdresa(eventAddressSelect.getValue());
+            akcCl.create_XML(event);
+            eventGrid.setItems(akcCl.findAll());
+            eventLabel.setValue("Akcie (celkom: " + akcCl.countREST() + ")");
+            
+            eventField1.setValue("");
+            eventField2.setValue("");
+            eventField3.setValue("");
+        });
+        eventGrid.addSelectionListener(e -> {
+            Set<Akcia> selected = e.getAllSelectedItems();
+            
+            if (selected.size() > 0) {
+                Akcia event = selected.stream().findFirst().get();
+                
+                eventEditBtn.setVisible(true);
+                eventDeleteBtn.setVisible(true);
+                eventAddBtn.setVisible(false);
+                
+                eventField1.setValue(event.getId().toString());
+                eventField2.setValue(event.getNazov());
+                eventField3.setValue(event.getDatumcas());
+                eventAddressSelect.setSelectedItem(event.getAdresa());
+            } else {
+                eventEditBtn.setVisible(false);
+                eventDeleteBtn.setVisible(false);
+                eventAddBtn.setVisible(true);
+                
+                eventField1.setValue("");
+                eventField2.setValue("");
+                eventField3.setValue("");
+                eventAddressSelect.setSelectedItem(null);
+            }            
+        });
+        
+        VerticalLayout eventForms = new VerticalLayout();
+        eventForms.addComponents(eventLabel, eventSearchForm, eventDetailForm);
         
         
         
-        eventSection.addComponents(eventGrid, eventForm);
+        eventSection.addComponents(eventGrid, eventForms);
         addressSection.addComponents(addressGrid, addressForms);
-        userSection.addComponents(userGrid, userForms);
+        userSection.addComponents(userGrid, userForms, userEventGrid);
         
         layout.addComponents(userSection, addressSection, eventSection);
         setContent(layout);

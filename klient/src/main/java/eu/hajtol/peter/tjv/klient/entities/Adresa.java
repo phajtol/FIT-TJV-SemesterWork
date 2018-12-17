@@ -132,7 +132,7 @@ public class Adresa implements Serializable {
 
     @Override
     public String toString() {
-        return "eu.hajtol.peter.tjv.server.entities.Adresa[ id=" + id + " ]";
+        return this.ulica + " " + this.cislo + ", " + this.psc + " " + this.mesto + ", " + this.krajina;
     }
     
 }

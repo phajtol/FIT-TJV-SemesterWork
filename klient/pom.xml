@@ -67,6 +67,11 @@
 			<artifactId>vaadin-themes</artifactId>
 		</dependency>
 	 <dependency>
+	  <groupId>org.vaadin.elements</groupId>
+	  <artifactId>combobox-element</artifactId>
+	  <version>1.0</version>
+	 </dependency>
+	 <dependency>
 	  <groupId>javax</groupId>
 	  <artifactId>javaee-web-api</artifactId>
 	  <version>7.0</version>
