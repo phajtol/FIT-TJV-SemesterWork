@@ -6,6 +6,7 @@
 package eu.hajtol.peter.tjv.klient.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -47,7 +48,7 @@ public class Uzivatel implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Adresa adresa;
     
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "uzivatel_akcia", 
             joinColumns = @JoinColumn(name = "uzivatelia_id"),
@@ -55,7 +56,6 @@ public class Uzivatel implements Serializable {
     )
     private List<Akcia> akcie;
 
-    @XmlTransient
     public List<Akcia> getAkcie() {
         return akcie;
     }

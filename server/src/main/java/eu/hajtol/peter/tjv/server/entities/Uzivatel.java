@@ -54,9 +54,8 @@ public class Uzivatel implements Serializable {
             joinColumns = @JoinColumn(name = "uzivatelia_id"),
             inverseJoinColumns = @JoinColumn(name = "akcie_id")
     )
-    private List<Akcia> akcie = new ArrayList<>();
+    private List<Akcia> akcie;
 
-    @XmlTransient
     public List<Akcia> getAkcie() {
         return akcie;
     }

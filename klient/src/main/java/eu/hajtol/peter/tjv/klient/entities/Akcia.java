@@ -6,6 +6,7 @@
 package eu.hajtol.peter.tjv.klient.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -36,13 +37,8 @@ public class Akcia implements Serializable {
     private String nazov;
     private String datumcas;
     
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "uzivatel_akcia", 
-            joinColumns = @JoinColumn(name = "akcie_id"),
-            inverseJoinColumns = @JoinColumn(name = "uzivatelia_id")
-    )
-    private List<Uzivatel> uzivatelia;
+    @ManyToMany(mappedBy = "akcie")
+    private List<Uzivatel> uzivatelia = new ArrayList<>();
     
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "adresa_id", referencedColumnName = "id")
