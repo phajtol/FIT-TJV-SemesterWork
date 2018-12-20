@@ -35,9 +35,7 @@ import java.util.Set;
  */
 @Theme("mytheme")
 public class MyUI extends UI {
-    
-    private Uzivatel selectedUser;
-            
+
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         final VerticalLayout layout = new VerticalLayout();
@@ -58,8 +56,6 @@ public class MyUI extends UI {
         //dropdown selects
         ComboBox<Adresa> eventAddressSelect = new ComboBox("Adresa", addressList);
         ComboBox<Adresa> userAddressSelect = new ComboBox("Adresa", addressList);
-        ComboBox<Akcia> userEventSelect = new ComboBox();
-        userEventSelect.setItems(eventList);
        
         //==========
         //USER PART
@@ -79,8 +75,6 @@ public class MyUI extends UI {
         Grid<Akcia> userEventGrid = new Grid<>();
         userEventGrid.addColumn(Akcia::getNazov).setCaption("Názov");
         userEventGrid.addColumn(Akcia::getDatumcas).setCaption("Dátum a čas");
-        Button userEventDeleteBtn = new Button("Zrušiť väzbu");
-        Button userEventAddBtn = new Button("Pridať väzbu");
        
         Label userLabel = new Label("Užívatelia (celkom: " + uzivCl.countREST() + ")");
         
@@ -159,7 +153,6 @@ public class MyUI extends UI {
             
             if (selected.size() > 0) {
                 Uzivatel user = selected.stream().findFirst().get();
-                this.selectedUser = user;
                 
                 userEditBtn.setVisible(true);
                 userDeleteBtn.setVisible(true);
@@ -172,14 +165,8 @@ public class MyUI extends UI {
                 userField5.setValue(user.getTelefon());
                 userField6.setValue(user.getMail());
                 userAddressSelect.setSelectedItem(user.getAdresa());
-                if (user.getAkcie() == null) {
-                    userEventGrid.setItems(new ArrayList<>());
-                } else {
-                    userEventGrid.setItems(user.getAkcie());
-                }
+                userEventGrid.setItems(user.getAkcie());
             } else {
-                this.selectedUser = null;
-                
                 userEditBtn.setVisible(false);
                 userDeleteBtn.setVisible(false);
                 userAddBtn.setVisible(true);
@@ -192,42 +179,11 @@ public class MyUI extends UI {
                 userField6.setValue("");
                 userAddressSelect.setSelectedItem(null);
                 userEventGrid.setItems(new ArrayList<Akcia>());
-            }
-
-            userEventSelect.setSelectedItem(null);
-        });
-        userEventGrid.addSelectionListener((SelectionEvent<Akcia> e) -> {
-            Set<Akcia> selected = e.getAllSelectedItems();
-            
-            if (selected.size() > 0) {
-                Akcia event = selected.stream().findFirst().get();
-                userEventSelect.setSelectedItem(event);
-            } else {
-                userAddressSelect.setSelectedItem(null);
             }            
-        });
-        userEventAddBtn.addClickListener(e -> {
-            this.selectedUser.addAkcia(userEventSelect.getValue());
-            uzivCl.edit_XML(this.selectedUser, this.selectedUser.getId().toString());
-            
-            Uzivatel user = uzivCl.find_XML(Uzivatel.class, this.selectedUser.getId().toString());
-            userEventGrid.setItems(user.getAkcie());
-        });
-        userEventDeleteBtn.addClickListener(e -> {
-            this.selectedUser.removeAkcia(userEventSelect.getValue());
-            uzivCl.edit_XML(this.selectedUser, this.selectedUser.getId().toString());
-            
-            Uzivatel user = uzivCl.find_XML(Uzivatel.class, this.selectedUser.getId().toString());
-            userEventGrid.setItems(user.getAkcie());
         });
         
         VerticalLayout userForms = new VerticalLayout();
         userForms.addComponents(userLabel, userSearchForm, userDetailForm);
-        
-        HorizontalLayout userEventsForm = new HorizontalLayout();
-        VerticalLayout userEvents = new VerticalLayout();
-        userEventsForm.addComponents(userEventSelect, userEventAddBtn, userEventDeleteBtn);
-        userEvents.addComponents(userEventGrid, userEventsForm);
         
         
         //==========
@@ -407,15 +363,11 @@ public class MyUI extends UI {
             event.setDatumcas(eventField3.getValue());
             event.setAdresa(eventAddressSelect.getValue());
             akcCl.edit_XML(event, event.getId().toString());
-            List<Akcia> events = akcCl.findAll();
-            eventGrid.setItems(events);
-            userEventSelect.setItems(events);
+            eventGrid.setItems(akcCl.findAll());
         });
         eventDeleteBtn.addClickListener(e -> {
             akcCl.remove(eventField1.getValue());
-            List<Akcia> events = akcCl.findAll();
-            eventGrid.setItems(events);
-            userEventSelect.setItems(events);
+            eventGrid.setItems(akcCl.findAll());
             eventLabel.setValue("Akcie (celkom: " + akcCl.countREST() + ")");
         });
         eventAddBtn.addClickListener(e -> {
@@ -424,9 +376,7 @@ public class MyUI extends UI {
             event.setDatumcas(eventField3.getValue());
             event.setAdresa(eventAddressSelect.getValue());
             akcCl.create_XML(event);
-            List<Akcia> events = akcCl.findAll();
-            eventGrid.setItems(events);
-            userEventSelect.setItems(events);
+            eventGrid.setItems(akcCl.findAll());
             eventLabel.setValue("Akcie (celkom: " + akcCl.countREST() + ")");
             
             eventField1.setValue("");
@@ -466,7 +416,7 @@ public class MyUI extends UI {
         
         eventSection.addComponents(eventGrid, eventForms);
         addressSection.addComponents(addressGrid, addressForms);
-        userSection.addComponents(userGrid, userForms, userEvents);
+        userSection.addComponents(userGrid, userForms, userEventGrid);
         
         layout.addComponents(userSection, addressSection, eventSection);
         setContent(layout);

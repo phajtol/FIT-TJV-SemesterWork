@@ -107,7 +107,7 @@ public class Akcia implements Serializable {
 
     @Override
     public String toString() {
-        return nazov + " (" + datumcas + ")";
+        return "eu.hajtol.peter.tjv.server.entities.Akcia[ id=" + id + " ]";
     }
     
 }
