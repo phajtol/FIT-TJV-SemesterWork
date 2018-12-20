@@ -48,13 +48,13 @@ public class Uzivatel implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Adresa adresa;
     
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "uzivatel_akcia", 
             joinColumns = @JoinColumn(name = "uzivatelia_id"),
             inverseJoinColumns = @JoinColumn(name = "akcie_id")
     )
-    private List<Akcia> akcie;
+    private List<Akcia> akcie = new ArrayList<>();
 
     public List<Akcia> getAkcie() {
         return akcie;
@@ -62,6 +62,14 @@ public class Uzivatel implements Serializable {
 
     public void setAkcie(List<Akcia> akcie) {
         this.akcie = akcie;
+    }
+    
+    public void addAkcia(Akcia akcia) {
+        this.akcie.add(akcia);
+    }
+    
+    public void removeAkcia(Akcia akcia) {
+        this.akcie.remove(akcia);
     }
     
     public Adresa getAdresa() {
