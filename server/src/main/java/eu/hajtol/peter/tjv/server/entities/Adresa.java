@@ -6,8 +6,10 @@
 package eu.hajtol.peter.tjv.server.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,11 +38,11 @@ public class Adresa implements Serializable {
     private String psc;
     private String krajina;
 
-    @OneToMany(mappedBy = "adresa")
-    private List<Akcia> akcie;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "adresa")
+    private List<Akcia> akcie = new ArrayList<>();
     
-    @OneToMany(mappedBy = "adresa")
-    private List<Uzivatel> uzivatelia;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "adresa")
+    private List<Uzivatel> uzivatelia = new ArrayList<>();
 
     
     @XmlTransient
@@ -51,7 +53,7 @@ public class Adresa implements Serializable {
     public void setAkcie(List<Akcia> akcie) {
         this.akcie = akcie;
     }
-
+    
     @XmlTransient
     public List<Uzivatel> getUzivatelia() {
         return uzivatelia;
