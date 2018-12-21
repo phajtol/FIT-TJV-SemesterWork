@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -19,10 +18,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -54,7 +51,7 @@ public class Uzivatel implements Serializable {
             joinColumns = @JoinColumn(name = "uzivatelia_id"),
             inverseJoinColumns = @JoinColumn(name = "akcie_id")
     )
-    private List<Akcia> akcie;
+    private List<Akcia> akcie = new ArrayList<>();
 
     public List<Akcia> getAkcie() {
         return akcie;
@@ -62,6 +59,14 @@ public class Uzivatel implements Serializable {
 
     public void setAkcie(List<Akcia> akcie) {
         this.akcie = akcie;
+    }
+    
+    public void addAkcia(Akcia akcia) {
+        this.akcie.add(akcia);
+    }
+    
+    public void removeAkcia(Akcia akcia) {
+        this.akcie.remove(akcia);
     }
     
     public Adresa getAdresa() {

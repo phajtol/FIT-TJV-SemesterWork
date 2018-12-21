@@ -4,6 +4,7 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.HasValue;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -13,6 +14,7 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -75,6 +77,13 @@ public class MyUI extends UI {
         Grid<Akcia> userEventGrid = new Grid<>();
         userEventGrid.addColumn(Akcia::getNazov).setCaption("Názov");
         userEventGrid.addColumn(Akcia::getDatumcas).setCaption("Dátum a čas");
+<<<<<<< HEAD
+=======
+        Button userEventDeleteBtn = new Button("Zrušiť väzbu");
+        Button userEventAddBtn = new Button("Pridať väzbu");
+        userEventDeleteBtn.setVisible(false);
+        userEventAddBtn.setVisible(false);
+>>>>>>> dev
        
         Label userLabel = new Label("Užívatelia (celkom: " + uzivCl.countREST() + ")");
         
@@ -83,7 +92,7 @@ public class MyUI extends UI {
         TextField userSearchText = new TextField();
         Button userSearchBtn = new Button("Hľadať");
         userSearchBtn.addClickListener(e -> {
-            if (userSearchText.getValue().equals("")) {
+            if (userSearchText.getValue().trim().equals("")) {
                 userGrid.setItems(uzivCl.findAll());
             } else {
                 List<Uzivatel> res = uzivCl.find(userSearchText.getValue());
@@ -96,11 +105,11 @@ public class MyUI extends UI {
         FormLayout userDetailForm = new FormLayout();
         TextField userField1 = new TextField("ID");
         userField1.setEnabled(false);
-        TextField userField2 = new TextField("Meno");
-        TextField userField3 = new TextField("Priezvisko");
-        TextField userField4 = new TextField("Username");
-        TextField userField5 = new TextField("Telefón");
-        TextField userField6 = new TextField("E-mail");
+        TextField userField2 = new TextField("Meno*");
+        TextField userField3 = new TextField("Priezvisko*");
+        TextField userField4 = new TextField("Username*");
+        TextField userField5 = new TextField("Telefón*");
+        TextField userField6 = new TextField("E-mail*");
         Button userEditBtn = new Button("Upraviť");
         Button userDeleteBtn = new Button("Zmazať");
         Button userAddBtn = new Button("Vytvoriť");
@@ -111,6 +120,21 @@ public class MyUI extends UI {
         
         //add actions to buttons and grid selection
         userEditBtn.addClickListener(e -> {
+            if("".equals(userField1.getValue().trim()) ||
+               "".equals(userField2.getValue().trim()) ||
+               "".equals(userField3.getValue().trim()) ||
+               "".equals(userField4.getValue().trim()) ||
+               "".equals(userField5.getValue().trim()) ||
+               "".equals(userField6.getValue().trim())
+                    ) {
+                Notification.show(
+                        "Nie sú vyplnené všetky povinné polia!", 
+                        "Vyplňte všetky polia označené hviezdičkou a skúste to znova", 
+                        Notification.Type.ERROR_MESSAGE
+                );
+                return;
+            }
+            
             Uzivatel user = new Uzivatel();
             user.setId(Integer.parseInt(userField1.getValue()));
             user.setMeno(userField2.getValue());
@@ -129,6 +153,20 @@ public class MyUI extends UI {
             userLabel.setValue("Užívatelia (celkom: " + uzivCl.countREST() + ")");
         });
         userAddBtn.addClickListener(e -> {
+            if("".equals(userField2.getValue().trim()) ||
+               "".equals(userField3.getValue().trim()) ||
+               "".equals(userField4.getValue().trim()) ||
+               "".equals(userField5.getValue().trim()) ||
+               "".equals(userField6.getValue().trim())
+                    ) {
+                Notification.show(
+                        "Nie sú vyplnené všetky povinné polia!", 
+                        "Vyplňte všetky polia označené hviezdičkou a skúste to znova", 
+                        Notification.Type.ERROR_MESSAGE
+                );
+                return;
+            }
+            
             Uzivatel user = new Uzivatel();
             user.setMeno(userField2.getValue());
             user.setPriezvisko(userField3.getValue());
@@ -179,8 +217,63 @@ public class MyUI extends UI {
                 userField6.setValue("");
                 userAddressSelect.setSelectedItem(null);
                 userEventGrid.setItems(new ArrayList<Akcia>());
+<<<<<<< HEAD
             }            
         });
+=======
+            }
+
+            userEventSelect.setSelectedItem(null);
+        });
+        userEventGrid.addSelectionListener((SelectionEvent<Akcia> e) -> {
+            Set<Akcia> selected = e.getAllSelectedItems();
+            
+            if (selected.size() > 0) {
+                Akcia event = selected.stream().findFirst().get();
+                userEventSelect.setSelectedItem(event);
+                
+                if (this.selectedUser.getAkcie().contains(event)) {
+                    userEventDeleteBtn.setVisible(true);
+                    userEventAddBtn.setVisible(false);
+                } else {
+                    userEventDeleteBtn.setVisible(false);
+                    userEventAddBtn.setVisible(true);
+                }
+            } else {
+                userAddressSelect.setSelectedItem(null);
+                userEventAddBtn.setVisible(false);
+                userEventDeleteBtn.setVisible(false);
+            }            
+        });
+        userEventSelect.addValueChangeListener((HasValue.ValueChangeEvent<Akcia> e) -> {
+            if (e.getSource().isEmpty()) {
+                userEventAddBtn.setVisible(false);
+                userEventDeleteBtn.setVisible(false);
+            } else {
+                if (this.selectedUser != null && this.selectedUser.getAkcie().contains(e.getValue())) {
+                    userEventDeleteBtn.setVisible(true);
+                    userEventAddBtn.setVisible(false);
+                } else {
+                    userEventDeleteBtn.setVisible(false);
+                    userEventAddBtn.setVisible(true);
+                }
+            }
+        });
+        userEventAddBtn.addClickListener(e -> {
+            this.selectedUser.addAkcia(userEventSelect.getValue());
+            uzivCl.edit_XML(this.selectedUser, this.selectedUser.getId().toString());
+            
+            Uzivatel user = uzivCl.find_XML(Uzivatel.class, this.selectedUser.getId().toString());
+            userEventGrid.setItems(user.getAkcie());
+        });
+        userEventDeleteBtn.addClickListener(e -> {
+            this.selectedUser.removeAkcia(userEventSelect.getValue());
+            uzivCl.edit_XML(this.selectedUser, this.selectedUser.getId().toString());
+            
+            Uzivatel user = uzivCl.find_XML(Uzivatel.class, this.selectedUser.getId().toString());
+            userEventGrid.setItems(user.getAkcie());
+        });
+>>>>>>> dev
         
         VerticalLayout userForms = new VerticalLayout();
         userForms.addComponents(userLabel, userSearchForm, userDetailForm);
@@ -207,7 +300,7 @@ public class MyUI extends UI {
         TextField addressSearchText = new TextField();
         Button addressSearchBtn = new Button("Hľadať");
         addressSearchBtn.addClickListener(e -> {
-            if (addressSearchText.getValue().equals("")) {
+            if (addressSearchText.getValue().trim().equals("")) {
                 addressGrid.setItems(adrCl.findAll());
             } else {
                 List<Adresa> res = adrCl.find(addressSearchText.getValue());
@@ -220,11 +313,11 @@ public class MyUI extends UI {
         FormLayout addressDetailForm = new FormLayout();
         TextField addressField1 = new TextField("ID");
         addressField1.setEnabled(false);
-        TextField addressField2 = new TextField("Ulica");
-        TextField addressField3 = new TextField("Číslo domu");
-        TextField addressField4 = new TextField("PSČ");
-        TextField addressField5 = new TextField("Mesto");
-        TextField addressField6 = new TextField("Krajina");
+        TextField addressField2 = new TextField("Ulica*");
+        TextField addressField3 = new TextField("Číslo domu*");
+        TextField addressField4 = new TextField("PSČ*");
+        TextField addressField5 = new TextField("Mesto*");
+        TextField addressField6 = new TextField("Krajina*");
         Button addressEditBtn = new Button("Upraviť");
         Button addressDeleteBtn = new Button("Zmazať");
         Button addressAddBtn = new Button("Vytvoriť");
@@ -237,6 +330,21 @@ public class MyUI extends UI {
         
         //add actions to buttons and grid selection
         addressEditBtn.addClickListener(e -> {
+            if("".equals(addressField1.getValue().trim()) ||
+               "".equals(addressField2.getValue().trim()) ||
+               "".equals(addressField3.getValue().trim()) ||
+               "".equals(addressField4.getValue().trim()) ||
+               "".equals(addressField5.getValue().trim()) ||
+               "".equals(addressField6.getValue().trim())
+                    ) {
+                Notification.show(
+                        "Nie sú vyplnené všetky povinné polia!", 
+                        "Vyplňte všetky polia označené hviezdičkou a skúste to znova", 
+                        Notification.Type.ERROR_MESSAGE
+                );
+                return;
+            }
+            
             Adresa address = new Adresa();
             address.setId(Integer.parseInt(addressField1.getValue()));
             address.setUlica(addressField2.getValue());
@@ -259,6 +367,20 @@ public class MyUI extends UI {
             addressLabel.setValue("Adresy (celkom: " + adrCl.countREST() + ")");
         });
         addressAddBtn.addClickListener(e -> {
+            if("".equals(addressField2.getValue().trim()) ||
+               "".equals(addressField3.getValue().trim()) ||
+               "".equals(addressField4.getValue().trim()) ||
+               "".equals(addressField5.getValue().trim()) ||
+               "".equals(addressField6.getValue().trim())
+                    ) {
+                Notification.show(
+                        "Nie sú vyplnené všetky povinné polia!", 
+                        "Vyplňte všetky polia označené hviezdičkou a skúste to znova", 
+                        Notification.Type.ERROR_MESSAGE
+                );
+                return;
+            }
+            
             Adresa address = new Adresa();
             address.setUlica(addressField2.getValue());
             address.setCislo(Integer.parseInt(addressField3.getValue()));
@@ -284,6 +406,13 @@ public class MyUI extends UI {
             
             if (selected.size() > 0) {
                 Adresa address = selected.stream().findFirst().get();
+                
+                if ( (address.getUzivatelia() != null && !address.getUzivatelia().isEmpty()) ||
+                     (address.getAkcie() != null && !address.getAkcie().isEmpty()) ) {
+                    addressDeleteBtn.setEnabled(false);
+                } else {
+                    addressDeleteBtn.setEnabled(true);
+                }
                 
                 addressEditBtn.setVisible(true);
                 addressDeleteBtn.setVisible(true);
@@ -332,7 +461,7 @@ public class MyUI extends UI {
         TextField eventSearchText = new TextField();
         Button eventSearchBtn = new Button("Hľadať");
         eventSearchBtn.addClickListener(e -> {
-            if (eventSearchText.getValue().equals("")) {
+            if (eventSearchText.getValue().trim().equals("")) {
                 eventGrid.setItems(akcCl.findAll());
             } else {
                 List<Akcia> res = akcCl.find(eventSearchText.getValue());
@@ -345,8 +474,8 @@ public class MyUI extends UI {
         FormLayout eventDetailForm = new FormLayout();
         TextField eventField1 = new TextField("ID");
         eventField1.setEnabled(false);
-        TextField eventField2 = new TextField("Názov");
-        TextField eventField3 = new TextField("Dátum a čas");
+        TextField eventField2 = new TextField("Názov*");
+        TextField eventField3 = new TextField("Dátum a čas*");
         Button eventEditBtn = new Button("Upraviť");
         Button eventDeleteBtn = new Button("Zmazať");
         Button eventAddBtn = new Button("Vytvoriť");
@@ -357,6 +486,18 @@ public class MyUI extends UI {
         
         //add actions to buttons and grid selection
         eventEditBtn.addClickListener(e -> {
+            if("".equals(eventField1.getValue().trim()) ||
+               "".equals(eventField2.getValue().trim()) ||
+               "".equals(eventField3.getValue().trim())
+                    ) {
+                Notification.show(
+                        "Nie sú vyplnené všetky povinné polia!", 
+                        "Vyplňte všetky polia označené hviezdičkou a skúste to znova", 
+                        Notification.Type.ERROR_MESSAGE
+                );
+                return;
+            }
+            
             Akcia event = new Akcia();
             event.setId(Integer.parseInt(eventField1.getValue()));
             event.setNazov(eventField2.getValue());
@@ -371,6 +512,16 @@ public class MyUI extends UI {
             eventLabel.setValue("Akcie (celkom: " + akcCl.countREST() + ")");
         });
         eventAddBtn.addClickListener(e -> {
+            if("".equals(eventField2.getValue().trim()) ||
+               "".equals(eventField3.getValue().trim())
+                    ) {
+                Notification.show(
+                        "Nie sú vyplnené všetky povinné polia!", 
+                        "Vyplňte všetky polia označené hviezdičkou a skúste to znova", 
+                        Notification.Type.ERROR_MESSAGE
+                );
+                return;
+            }
             Akcia event = new Akcia();
             event.setNazov(eventField2.getValue());
             event.setDatumcas(eventField3.getValue());
