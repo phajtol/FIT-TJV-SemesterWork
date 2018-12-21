@@ -37,6 +37,8 @@ import java.util.Set;
  */
 @Theme("mytheme")
 public class MyUI extends UI {
+    
+    private Uzivatel selectedUser;
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
@@ -58,6 +60,8 @@ public class MyUI extends UI {
         //dropdown selects
         ComboBox<Adresa> eventAddressSelect = new ComboBox("Adresa", addressList);
         ComboBox<Adresa> userAddressSelect = new ComboBox("Adresa", addressList);
+        ComboBox<Akcia> userEventSelect = new ComboBox();
+        userEventSelect.setItems(eventList);
        
         //==========
         //USER PART
@@ -77,13 +81,10 @@ public class MyUI extends UI {
         Grid<Akcia> userEventGrid = new Grid<>();
         userEventGrid.addColumn(Akcia::getNazov).setCaption("Názov");
         userEventGrid.addColumn(Akcia::getDatumcas).setCaption("Dátum a čas");
-<<<<<<< HEAD
-=======
         Button userEventDeleteBtn = new Button("Zrušiť väzbu");
         Button userEventAddBtn = new Button("Pridať väzbu");
         userEventDeleteBtn.setVisible(false);
         userEventAddBtn.setVisible(false);
->>>>>>> dev
        
         Label userLabel = new Label("Užívatelia (celkom: " + uzivCl.countREST() + ")");
         
@@ -217,10 +218,6 @@ public class MyUI extends UI {
                 userField6.setValue("");
                 userAddressSelect.setSelectedItem(null);
                 userEventGrid.setItems(new ArrayList<Akcia>());
-<<<<<<< HEAD
-            }            
-        });
-=======
             }
 
             userEventSelect.setSelectedItem(null);
@@ -273,7 +270,6 @@ public class MyUI extends UI {
             Uzivatel user = uzivCl.find_XML(Uzivatel.class, this.selectedUser.getId().toString());
             userEventGrid.setItems(user.getAkcie());
         });
->>>>>>> dev
         
         VerticalLayout userForms = new VerticalLayout();
         userForms.addComponents(userLabel, userSearchForm, userDetailForm);
